@@ -1,0 +1,568 @@
+openapi: 3.0.0
+info:
+  title: База данных книг в библиотеке
+  description: "Разработка Restful API для управления базой данных о книгах в библиотеке. Сущность: 1). Книга: ID, title, genre, year of publication, author ID. Операции: 1). Добавление новой книги; 2). Редактирование существующей книги; 3). Удаление книги. Запросы: 1). Получение списка всех книг с деталями; 2). Получение информации о книге по её ID. Дополнительно: 1). Реализовать фильтрацию книг по жанру (например - все книги жанра “Фантастика”); 2). Реализовать пагинацию для списка книг."
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/leshashablovskiy/Bookstore/1
+  description: Training Server
+paths:
+  /book:
+    get:
+      tags:
+      - Books
+      summary: Метод получения списка всех книг с деталями
+      description: Возвращает список всех книг с их деталями
+      operationId: getBooksList
+      parameters:
+      - name: page
+        in: query
+        description: Количество страниц для извлечения
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 1
+      - name: pageSize
+        in: query
+        description: Количество элементов на странице
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 2
+      responses:
+        "200":
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "201":
+          description: Успешный ответ со списком книг с их деталями
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201'
+        "401":
+          description: Некорректно введены данные или такого пользователя не существует. Проверьте данные и повторите снова.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_401'
+        "404":
+          description: Книги не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "520":
+          description: Неизвестная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_520'
+      security:
+      - bearerAuth: []
+  /book/{Id}/{Title}/{Genre}/{Year_of_publication}/{Author_ID}:
+    post:
+      tags:
+      - Book
+      summary: Метод добавления книги
+      operationId: createBook
+      parameters:
+      - name: Id
+        in: path
+        description: Введите Id книги
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 1
+      - name: Title
+        in: path
+        description: Введите название книги
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: Звездный путь
+      - name: Genre
+        in: path
+        description: Введите жанр книги
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: Фантастика
+      - name: Year_of_publication
+        in: path
+        description: Введите год выпуска книги
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 2024-01-28
+      - name: Author_ID
+        in: path
+        description: Введите Id автора книги
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: "245"
+      responses:
+        "200":
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "201":
+          description: Новая книга добавлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        "401":
+          description: Некорректно введены данные или такого пользователя не существует. Проверьте данные и повторите снова.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_401'
+        "520":
+          description: Неизвестная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_520'
+      security:
+      - bearerAuth: []
+  /book/{book_genre}:
+    get:
+      tags:
+      - Books
+      summary: Метод поиска/сортировки книг по жанру
+      operationId: getBookByGenre
+      parameters:
+      - name: book_genre
+        in: path
+        description: Введите жанр книги
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: Фантастика
+      - name: page
+        in: query
+        description: Количество страниц для извлечения
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 1
+      - name: pageSize
+        in: query
+        description: Количество элементов на странице
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+          default: 1
+      responses:
+        "201":
+          description: Успешный ответ со списком книг с их деталями
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201_1'
+        "400":
+          description: Такого жанра не существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400'
+        "404":
+          description: Книги не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_404'
+        "520":
+          description: Неизвестная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_520'
+      security: []
+  /book/{book_id}:
+    get:
+      tags:
+      - Book
+      summary: Метод поиска информации о книге по её Id
+      operationId: getBookById
+      parameters:
+      - name: book_id
+        in: path
+        description: Введите Id
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 1
+      responses:
+        "201":
+          description: Успешный ответ со списком книг с их деталями
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_201_2'
+        "400":
+          description: Такого Id не существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+        "520":
+          description: Неизвестная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_520'
+      security: []
+    put:
+      tags:
+      - Book
+      summary: Метод редактирования книги по Id
+      description: Эта функция доступна только администратору
+      operationId: updateBookById
+      parameters:
+      - name: book_id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 1
+      requestBody:
+        description: Обновление существующей книги
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+      responses:
+        "200":
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "201":
+          description: Успешное обновление книги
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        "400":
+          description: Такого Id не существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+        "401":
+          description: Некорректно введены данные или такого пользователя не существует. Проверьте данные и повторите снова.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_401'
+        "520":
+          description: Неизвестная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_520'
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - Book
+      summary: Метод удаления книги по её Id
+      operationId: deleteBookById
+      parameters:
+      - name: book_id
+        in: path
+        description: Идентификатор книги
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+        example: 1
+      responses:
+        "200":
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "201":
+          description: Успешно удалено
+          content:
+            application/json: {}
+        "400":
+          description: Такого Id не существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_400_1'
+        "401":
+          description: Некорректно введены данные или такого пользователя не существует. Проверьте данные и повторите снова.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_401'
+        "520":
+          description: Неизвестная ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/inline_response_520'
+      security:
+      - bearerAuth: []
+components:
+  schemas:
+    Book:
+      required:
+      - author_Id
+      - title
+      type: object
+      properties:
+        Id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Звездный путь
+        genre:
+          type: string
+          example: Фантастика
+        year_of_publication:
+          type: string
+          format: date
+          example: 2024-01-28
+        author_Id:
+          type: integer
+          example: 245
+    Book2:
+      required:
+      - author_Id
+      - title
+      type: object
+      properties:
+        Id:
+          type: integer
+          example: 2
+        title:
+          type: string
+        genre:
+          type: string
+          example: Фэнтези
+        year_of_publication:
+          type: string
+          format: date
+          example: 2014-01-28
+        author_Id:
+          type: integer
+          example: 24
+    Books:
+      type: array
+      items:
+        $ref: '#/components/schemas/Books_inner'
+    SuccessResponse:
+      required:
+      - token
+      - user
+      type: object
+      properties:
+        token:
+          type: string
+          example: "1"
+        description:
+          type: string
+          example: JWT токен
+        user:
+          $ref: '#/components/schemas/SuccessResponse_user'
+    inline_response_201:
+      type: object
+      properties:
+        books:
+          allOf:
+          - $ref: '#/components/schemas/Books'
+        totalItems:
+          type: integer
+          description: Общее количество книг
+          example: 2
+        totalPages:
+          type: integer
+          description: Общее количество страниц
+          example: 1
+        currentPage:
+          type: integer
+          description: Текущая страница
+          example: 1
+    inline_response_401:
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      example:
+        code: "401"
+        message: Некорректно введены данные или такого пользователя не существует. Проверьте данные и повторите снова.
+    inline_response_404:
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      example:
+        code: "404"
+        message: Книги не найдены
+    inline_response_520:
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      example:
+        code: "520"
+        message: Неизвестная ошибка
+    inline_response_201_1:
+      type: object
+      properties:
+        books:
+          anyOf:
+          - $ref: '#/components/schemas/Book'
+        totalItems:
+          type: integer
+          description: Общее количество книг
+          example: 1
+        totalPages:
+          type: integer
+          description: Общее количество страниц
+          example: 1
+        currentPage:
+          type: integer
+          description: Текущая страница
+          example: 1
+    inline_response_400:
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      example:
+        code: "400"
+        message: Такого жанра не существует
+    inline_response_201_2:
+      type: object
+      properties:
+        books:
+          anyOf:
+          - $ref: '#/components/schemas/Book'
+    inline_response_400_1:
+      required:
+      - code
+      - message
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+      example:
+        code: "400"
+        message: Такого Id не существует
+    Books_inner:
+      type: object
+      properties:
+        Book:
+          $ref: '#/components/schemas/Book'
+        Book2:
+          $ref: '#/components/schemas/Book2'
+    SuccessResponse_user:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 21
+        username:
+          type: string
+          example: Ale.Sha.
+        email:
+          type: string
+          example: ale.sha@gmail.com
+  responses:
+    UnauthorizedError:
+      description: Некорректно введены данные или такого пользователя не существует. Проверьте данные и повторите снова.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_response_401'
+    Unexpected:
+      description: Неизвестная ошибка
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_response_520'
+    Bad:
+      description: Такого Id не существует
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_response_400_1'
+    Bad2:
+      description: Такого жанра не существует
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_response_400'
+    NotFoundError:
+      description: Книги не найдены
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_response_404'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
